@@ -40,20 +40,29 @@ defmodule Tubex.Channel do
       %Tubex.Channel{
         id: payload["id"],
         etag: payload["etag"],
+        branding_settings: parse_branding_settings(payload["brandingSettings"]),
         content_details: parse_content_details(payload["contentDetails"]),
         statistics: parse_statistics(payload["statistics"]),
+        snippet: parse_snippet(payload["snippet"]),
         topic_details: parse_topic_details(payload["topicDetails"]),
         status: parse_status(payload["status"])
       }
     }
   end
 
-  defp parse_audit_details(audit) do
-    
-  end
-
   defp parse_branding_settings(settings) do
-    
+    %{
+      channel: %{
+        description: get_in(settings, ~w(channel description)),
+        title: get_in(settings, ~w(channel, title)),
+        featured_channels_title: get_in(settings, ~w(channel, featuredChannelsTitle)),
+        featured_channels_urls: get_in(settings, ~w(channel featuredChannelsUrls)),
+        unsubscribed_trailer: get_in(settings, ~w(channel unsubscribedTrailer)),
+        profile_color: get_in(settings, ~w(channel profileColor)),
+        keywords: get_in(settings, ~w(channel keywords)) |> String.split(" "),
+        country: get_in(settings, ~w(channel country))
+      }
+    }
   end
 
   defp parse_content_details(content_details) do
@@ -67,7 +76,13 @@ defmodule Tubex.Channel do
   end
 
   defp parse_snippet(snippet) do
-    
+    %{
+      published_at: snippet["publishedAt"],
+      description: snippet["description"],
+      title: snippet["title"],
+      custom_url: snippet["customUrl"],
+      country: snippet["country"]
+    }
   end
 
   defp parse_statistics(statistics) do

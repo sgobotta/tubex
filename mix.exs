@@ -18,7 +18,8 @@ defmodule Tubex.Mixfile do
   #
   # Type "mix help compile.app" for more information
   def application do
-    [applications: [:logger, :httpoison]]
+    [applications: [:logger, :httpoison],
+     mod: {Tubex, []}]
   end
 
   defp package do
@@ -41,6 +42,8 @@ defmodule Tubex.Mixfile do
     [
       {:poison, "~> 3.1"},
       {:httpoison, "~> 0.11.1"},
+      {:bitcask, "~> 2.0"},
+      {:bypass, "~> 0.6", only: :test},
       {:ex_doc, "~> 0.8.0", only: :dev},
       {:earmark, ">= 0.0.0", only: :dev}
     ]
