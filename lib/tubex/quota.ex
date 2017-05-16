@@ -18,8 +18,9 @@ defmodule Tubex.Quota do
   @spec new(Keyword.t) :: {:ok, pid} | {:error, term}
   def new(config) do
     dir = Keyword.get(config, :directory)
-    ref = :bitcask.open(to_char_list(dir), [:read_write, {:expiry_secs, 10}])
-    Agent.start_link(fn -> %{dir: dir, ref: ref} end, name: __MODULE__)
+    expiry = Keyword.get(config, :expiry_secs, 10)
+    ref = :bitcask.open(to_char_list(dir), [:read_write, {:expiry_secs, expiry}])
+    Agent.start_link(fn -> %{dir: dir, expiry: expiry, ref: ref} end, name: __MODULE__)
   end
 
   def total_used(pid) do
