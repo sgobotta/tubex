@@ -20,10 +20,25 @@ defmodule Tubex.Channel do
     {:error, "Unknown request"}
   end
 
+  def search_by(query, opts) do
+    defaults = [key: Tubex.api_key, part: "id,snippet", maxResults: 50, type: "channels", q: query]
+    opts = Keyword.merge(defaults, opts)
+
+    case Tubex.API.get(Tubex.endpoint <> "/search", opts) do
+      {:ok, response} ->
+        tokens = %{"nextPageToken" => response["nextPageToken"], "prevPageToken" => response["prevPageToken"]}
+        page_info = Map.merge(response["pageInfo"], tokens)
+        IO.inspect response
+        # {:ok, Enum.map(response["items"], &parse!/1), page_info}
+        {:ok, response["items"], page_info}
+      err -> err
+    end
+  end
+
   defp request(opts) do
     case Tubex.API.get(Tubex.endpoint <> "/channels", opts) do
       {:ok, res} ->
-        {:ok, res["items"] |> Enum.map(&parse!/1), res["pageInfo"]}
+        {:ok, res["items"], res["pageInfo"]} #|> Enum.map(&parse!/1), res["pageInfo"]}
       error -> error
     end
   end
@@ -59,7 +74,7 @@ defmodule Tubex.Channel do
         featured_channels_urls: get_in(settings, ~w(channel featuredChannelsUrls)),
         unsubscribed_trailer: get_in(settings, ~w(channel unsubscribedTrailer)),
         profile_color: get_in(settings, ~w(channel profileColor)),
-        keywords: get_in(settings, ~w(channel keywords)) |> String.split(" "),
+        keywords: get_in(settings, ~w(channel keywords)),
         country: get_in(settings, ~w(channel country))
       }
     }
@@ -77,6 +92,7 @@ defmodule Tubex.Channel do
 
   defp parse_snippet(snippet) do
     %{
+      channel_id: snippet["channelId"],
       published_at: snippet["publishedAt"],
       description: snippet["description"],
       title: snippet["title"],
@@ -87,11 +103,11 @@ defmodule Tubex.Channel do
 
   defp parse_statistics(statistics) do
     %{
-      view_count: statistics["viewCount"] |> String.to_integer,
-      comment_count: statistics["commentCount"] |> String.to_integer,
-      subscriber_count: statistics["subscriberCount"] |> String.to_integer,
-      hidden_subscriber_count: (statistics["hiddenSubscriberCount"] || "0") |> String.to_integer,
-      video_count: statistics["videoCount"] |> String.to_integer
+      view_count: statistics["viewCount"],
+      comment_count: statistics["commentCount"],
+      subscriber_count: statistics["subscriberCount"],
+      hidden_subscriber_count: statistics["hiddenSubscriberCount"],
+      video_count: statistics["videoCount"]
     }
   end
 
@@ -115,7 +131,8 @@ defimpl Tubex.Quota.Limits, for: Tubex.Channel do
   require Logger
 
   def cost_for(%Tubex.Channel{}, :list, parts) do
-    Enum.reduce(parts, 0, &(&2 + Keyword.get(part_costs(:list), &1, 0)))
+    # The 1 + is because the query itself always costs 1 point for channels.
+    Enum.reduce(parts, 0, &(1 + &2 + Keyword.get(part_costs(:list), &1, 0)))
   end
 
   def cost_for(%Tubex.Channel{}, action, parts) do
