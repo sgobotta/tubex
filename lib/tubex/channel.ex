@@ -10,7 +10,7 @@ defmodule Tubex.Channel do
   end
 
   def find_by(:username, username, opts) do
-    defaults = [key: Tubex.api_key, username: username, part: "id"]
+    defaults = [key: Tubex.api_key, forUsername: username, part: "id"]
     opts2 = Keyword.merge(defaults, opts)
     request(opts2)
   end
