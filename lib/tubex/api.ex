@@ -31,7 +31,6 @@ defmodule Tubex.API do
   end
 
   defp handle_response(%HTTPoison.Response{body: body, status_code: _} = response) do
-    Logger.warn("Response: #{inspect response}")
     {:error, Poison.decode!(body)}
   end
 
