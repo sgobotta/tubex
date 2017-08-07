@@ -5,7 +5,17 @@ defmodule Tubex.Video do
   @doc """
   fetch contents details
   """
-  def detail(video_id, opts \\ []) do
+  def detail(video_ids, opts \\ [])
+  def detail(video_ids, opts) when is_list(video_ids) do
+    defaults = [key: Tubex.api_key, id: Enum.join(video_ids, ","), part: "statistics"]
+    opts2 = Keyword.merge(defaults, opts)
+
+    case Tubex.API.get(Tubex.endpoint <> "/videos", opts2) do
+      {:ok, response} -> response
+      err -> err
+    end
+  end
+  def detail(video_id, opts) do
     defaults = [key: Tubex.api_key, id: video_id, part: "contentDetails"]
     opts = Keyword.merge(defaults, opts)
 
