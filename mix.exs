@@ -41,7 +41,7 @@ defmodule Tubex.Mixfile do
   defp deps do
     [
       {:poison, "~> 3.1"},
-      {:httpoison, "~> 0.11.1"},
+      {:httpoison, "~> 1.6", override: true},
       {:bitcask, "~> 2.0"},
       {:bypass, "~> 0.6", only: :test},
       {:ex_doc, "~> 0.8.0", only: :dev},
