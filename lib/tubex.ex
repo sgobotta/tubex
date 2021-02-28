@@ -15,10 +15,25 @@ defmodule Tubex do
     Supervisor.start_link(children, opts)
   end
 
-  def endpoint, do: "https://www.googleapis.com/youtube/v3"
+  def endpoint do
+    case System.get_env("MIX_ENV") do
+      "test" -> "https://test.ex"
+      _      -> "https://www.googleapis.com/youtube/v3"
+    end
+  end
 
   def api_key do
-    @config[:api_key] || System.get_env("YOUTUBE_API_KEY")
+    @config[:api_key] || case System.get_env("MIX_ENV") do
+      "test" -> System.get_env("YOUTUBE_TEST_API_KEY")
+      _      -> System.get_env("YOUTUBE_API_KEY")
+    end
+  end
+
+  def api_client do
+    case System.get_env("MIX_ENV") do
+      "test" -> Tubex.MockAPI
+      _      -> Tubex.API
+    end
   end
 
   @moduledoc false
