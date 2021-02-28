@@ -58,7 +58,7 @@ defmodule Tubex.Video do
     defaults = [key: Tubex.api_key, part: "snippet", maxResults: 50, type: "video", q: query]
     opts = Keyword.merge(defaults, opts)
 
-    case Tubex.API.get(Tubex.endpoint <> "/search", opts) do
+    case Tubex.api_client().get(Tubex.endpoint <> "/search", opts) do
       {:ok, response} ->
         tokens = %{"nextPageToken" => response["nextPageToken"], "prevPageToken" => response["prevPageToken"]}
         page_info = Map.merge(response["pageInfo"], tokens)
