@@ -28,3 +28,34 @@ use Mix.Config
 # here (which is why it is important to import them last).
 #
 #     import_config "#{Mix.env}.exs"
+
+
+# Configures Elixir's Logger
+config :logger, :console,
+  format: "$time $metadata[$level] $message\n",
+  metadata: [:request_id],
+  truncate: :infinity
+
+config :logger,
+  backends: [:console,
+    {LoggerFileBackend, :info},
+    {LoggerFileBackend, :error},
+    {LoggerFileBackend, :warn}
+  ],
+  format: "[$level] $message\n",
+  truncate: :infinity
+
+config :logger, :warn,
+  path: Path.join("log", "#{Mix.env}.log"),
+  level: :warn,
+  truncate: :infinity
+
+config :logger, :info,
+  path: Path.join("log", "#{Mix.env}.log"),
+  level: :info,
+  truncate: :infinity
+
+config :logger, :error,
+  path: Path.join("log", "#{Mix.env}.log"),
+  level: :error,
+  truncate: :infinity

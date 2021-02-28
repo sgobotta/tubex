@@ -28,7 +28,6 @@ defmodule Tubex.Channel do
       {:ok, response} ->
         tokens = %{"nextPageToken" => response["nextPageToken"], "prevPageToken" => response["prevPageToken"]}
         page_info = Map.merge(response["pageInfo"], tokens)
-        IO.inspect response
         # {:ok, Enum.map(response["items"], &parse!/1), page_info}
         {:ok, response["items"], page_info}
       err -> err
