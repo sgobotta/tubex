@@ -1,8 +1,6 @@
 defmodule Tubex do
   use Application
 
-  @config Application.get_env(:tubex, Tubex)
-
   def start(_type, _args) do
     persistence_set_defaults()
     import Supervisor.Spec, warn: false
@@ -22,11 +20,30 @@ defmodule Tubex do
     end
   end
 
+  @doc """
+  Returns the YouTube Data API key.
+
+  Resolution order (first non-nil wins):
+
+  1. `Application.get_env(:tubex, Tubex)[:api_key]` (set in config or `runtime.exs`)
+  2. `YOUTUBE_TEST_API_KEY` when `MIX_ENV=test`, otherwise `YOUTUBE_API_KEY`
+
+  Config is read at call time so host apps can change `.env` and restart without
+  recompiling the tubex dependency.
+  """
   def api_key do
-    @config[:api_key] || case System.get_env("MIX_ENV") do
+    config()[:api_key] || env_api_key()
+  end
+
+  defp env_api_key do
+    case System.get_env("MIX_ENV") do
       "test" -> System.get_env("YOUTUBE_TEST_API_KEY")
-      _      -> System.get_env("YOUTUBE_API_KEY")
+      _ -> System.get_env("YOUTUBE_API_KEY")
     end
+  end
+
+  defp config do
+    Application.get_env(:tubex, Tubex, [])
   end
 
   def api_client do
@@ -62,6 +79,6 @@ defmodule Tubex do
   end
 
   def persistence_config do
-    @config[:persist]
+    config()[:persist]
   end
 end
